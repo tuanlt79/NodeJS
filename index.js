@@ -1,5 +1,12 @@
 const yargs = require("yargs");
-const { addTask, deleteTask } = require("./task");
+const {
+  addTask,
+  deleteTask,
+  listAllTask,
+  listByType,
+  idDetail,
+  updateTask,
+} = require("./task");
 //command add task
 yargs.command({
   command: "add",
@@ -51,7 +58,7 @@ yargs.command({
     },
   },
   handler: function (args) {
-    console.log("update", args);
+    updateTask(args.title, args.description, args.type);
   },
 });
 //view all task
@@ -59,7 +66,7 @@ yargs.command({
   command: "list",
 
   handler: function (args) {
-    console.log("list", args);
+    listAllTask();
   },
 });
 // view task detail
@@ -71,7 +78,7 @@ yargs.command({
     },
   },
   handler: function (args) {
-    console.log("detail", args);
+    idDetail(args.id);
   },
 });
 //view task by type
@@ -83,7 +90,7 @@ yargs.command({
     },
   },
   handler: function (args) {
-    console.log("listByType", args);
+    listByType(args.type);
   },
 });
 yargs.parse();
