@@ -1,7 +1,7 @@
 const express = require("express");
 const { rootRouter } = require("./routers/root.Router");
 const app = express();
-const port = 4000;
+const port = 5000;
 //localhost:4000/
 app.use(express.json());
 app.use("/api", rootRouter);

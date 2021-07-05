@@ -5,28 +5,38 @@ const {
   updateUser,
   deleteUser,
   addUser,
+  upLoadImages,
 } = require("../contronller/user.controller");
+const {
+  authenticate,
+  authorize,
+} = require("../middlewares/auth/veryfy-token.middle");
+const { logFeature } = require("../middlewares/log/log.middleware");
+const { upLoadImageSingle } = require("../middlewares/upload/upload.middle");
+const {
+  checkExit,
+} = require("../middlewares/validations/check-exit.middleware");
 const userRouter = express.Router();
-const userList = [
-  {
-    id: "1",
-    name: "Trần Thị Hoa Hồng",
-    email: "hong@gmail.com",
-  },
-  {
-    id: "2",
-    name: "Trần Thị Hoa Lan",
-    email: "lan@gmail.com",
-  },
-];
+const { User } = require("../models/");
 
+//upload hinh
+userRouter.post(
+  "/upload-image",
+  authenticate,
+  upLoadImageSingle(),
+  upLoadImages
+);
 /**
  * api lấy danh sách người dùng
  * method:get
  */
-userRouter.get("/", getListUser);
+userRouter.get(
+  "/",
+  logFeature("day la tinh nang lay danh sach nguoi dung"),
+  getListUser
+);
 
-userRouter.get("/:id", getInfoUser);
+userRouter.get("/:id", checkExit(User), getInfoUser);
 /**
  * api them sách người dùng
  * method:post
@@ -38,13 +48,20 @@ userRouter.post("/", addUser);
  * method:post
  * url: http://localhost:4000/users/
  */
-userRouter.delete("/:id", deleteUser);
+userRouter.delete(
+  "/:id",
+  authenticate,
+  authorize(["ADMIN", "SUPPER_ADMIN"]),
+  checkExit(User),
+  deleteUser
+);
 /**
  * api update sách người dùng
  * method:post
  * url: http://localhost:4000/users/
  */
-userRouter.put("/:id", updateUser);
+userRouter.put("/:id", checkExit(User), updateUser);
+
 module.exports = {
   userRouter,
 };

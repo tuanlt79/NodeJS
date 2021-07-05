@@ -1,65 +1,76 @@
 const { User } = require("../models");
+const bcryptjs = require("bcryptjs");
 
-const userList = [
-  {
-    id: "1",
-    name: "Trần Thị Hoa Hồng",
-    email: "hong@gmail.com",
-  },
-  {
-    id: "2",
-    name: "Trần Thị Hoa Lan",
-    email: "lan@gmail.com",
-  },
-];
-
-const getListUser = (req, res) => {
-  res.send(userList);
-};
-const getInfoUser = (req, res) => {
-  const { id } = req.params;
-  const userDetail = userList.find((user) => user.id === id);
-  if (userDetail) {
-    res.status(200).send(userDetail);
-  } else {
-    res.status(404).send("Not Found!");
+const getListUser = async (req, res) => {
+  try {
+    const userList = await User.findAll();
+    res.status(200).send(userList);
+  } catch (error) {
+    res.status(500).send(error);
   }
 };
+const getInfoUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const userDetail = await User.findByPk(id);
+    res.status(200).send(userDetail);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+
 const addUser = async (req, res) => {
   const { name, email, password, age, phone, role } = req.body;
-  const newUser = await User.create({
-    name,
-    email,
-    password,
-    age,
-    phone,
-    role,
-  });
-  res.status(201).send(newUser);
-};
-const deleteUser = (req, res) => {
-  const { id } = req.params;
-  const index = userList.findIndex((user) => user.id === id);
-  if (index !== -1) {
-    const userDelete = userList[index];
-    userList.splice(index, 1);
-    res.status(200).send(userDelete);
-  } else {
-    res.status(404).send("Not Foud");
+  try {
+    // tao chuỗi ngẫu nhiên
+    const salt = bcryptjs.genSaltSync(10);
+    // mã hoá password
+    const hashPassword = bcryptjs.hashSync(password, salt);
+    const newUser = await User.create({
+      name,
+      email,
+      password: hashPassword,
+      age,
+      phone,
+      role,
+    });
+    res.status(201).send(newUser);
+  } catch (error) {
+    res.status(500).send(error);
   }
 };
-const updateUser = (req, res) => {
-  const { name, email } = req.body;
+const deleteUser = async (req, res) => {
   const { id } = req.params;
-  const index = userList.findIndex((user) => user.id == id);
-  if (index !== -1) {
-    const user = userList[index];
-    const userUpdate = { ...user, name, email };
-    userList[index] = userUpdate;
-    res.status(200).send(userUpdate);
-  } else {
-    res.status(404).send("Not Foud");
+  try {
+    await User.destroy({
+      where: {
+        id,
+      },
+    });
+    res.status(200).send("Xoa Thanh Cong");
+  } catch (error) {
+    res.status(500).send(error);
   }
+};
+const updateUser = async (req, res) => {
+  const { name, email, age, phone, role } = req.body;
+  const { id } = req.params;
+  try {
+    await User.update(
+      { name, email, age, phone, role },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+    res.status(200).send("update thanh cong");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+};
+const upLoadImages = (req, res) => {
+  res.send("run upload");
 };
 module.exports = {
   getListUser,
@@ -67,4 +78,5 @@ module.exports = {
   addUser,
   deleteUser,
   updateUser,
+  upLoadImages,
 };
