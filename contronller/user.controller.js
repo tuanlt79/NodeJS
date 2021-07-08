@@ -69,8 +69,18 @@ const updateUser = async (req, res) => {
     res.status(500).send(error);
   }
 };
-const upLoadImages = (req, res) => {
-  res.send("run upload");
+const upLoadImages = async(req, res) => {
+  const { file,user } = req;
+  const urlImage = "http://localhost:5000/" + file.path;
+  try {
+    const userDetail = await User.findByPk(user.id);
+    userDetail.avatar = urlImage;
+    await userDetail.save();
+    res.send(userDetail);
+  } catch (error) {
+    res.status(500).send(error)
+  }
+  // console.log(urlImage)// nãy coi chừng anh chưa save, giờ thử lại xem
 };
 module.exports = {
   getListUser,
